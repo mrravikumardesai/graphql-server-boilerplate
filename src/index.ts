@@ -1,31 +1,16 @@
 import express from "express"
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+
 import { expressMiddleware } from "@apollo/server/express4"
+import connectDb from "./mongodb/dbconfig";
+import User from "./model/User";
+import createApolloServer from "./graphql";
 
 const app = express()
 const PORT = process.env.PORT || 8000
 
 async function init() {
 
-    // create graphql server
-    const gqlServer = new ApolloServer({
-        typeDefs: `
-            type Query{
-                hello:String
-                sayName(name:String):String
-            }
-        `, // schema
-        resolvers: {
-            Query:{
-                hello:()=> "HELLO",
-                sayName:(_,{name})=>`Hello ${name}!`
-            }
-        }  // function which will execture
-    })
-
-    // start gql server
-    await gqlServer.start()
+  
 
     app.use(express.json())
 
@@ -34,10 +19,13 @@ async function init() {
     })
 
 
-    app.use("/graphql", expressMiddleware(gqlServer))
+    app.use("/graphql", expressMiddleware(await createApolloServer()))
 
 
-    app.listen(PORT, () => console.log(`Server started at port ${PORT}`))
+    app.listen(PORT, () => {
+        connectDb()
+        console.log(`Server started at port ${PORT}`)
+    })
 }
 
 init()
