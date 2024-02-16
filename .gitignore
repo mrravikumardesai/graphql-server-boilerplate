@@ -91,6 +91,7 @@ out
 .nuxt
 dist
 build
+package-lock.json
 
 # Gatsby files
 .cache/
